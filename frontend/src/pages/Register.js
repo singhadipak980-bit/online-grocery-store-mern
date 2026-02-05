@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../api";
-import { useNavigate } from "react-router-dom";
+import "../auth.css";
 
 function Register() {
   const [form, setForm] = useState({
@@ -20,12 +21,11 @@ function Register() {
 
     const payload = {
       ...form,
-      email: form.email.toLowerCase(), // ✅ normalize email
+      email: form.email.toLowerCase(),
     };
 
     try {
       await API.post("/auth/register", payload);
-      alert("Registration successful. Please login.");
       navigate("/login");
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
@@ -33,37 +33,44 @@ function Register() {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2>Register</h2>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-        />
-        <br />
+        <form onSubmit={handleSubmit}>
+          <input
+            name="name"
+            placeholder="Full Name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-        />
-        <br />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-        />
-        <br />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
 
-        <button type="submit">Register</button>
-      </form>
+          <button type="submit">Create Account</button>
+        </form>
+
+        <div className="auth-link">
+          Already have an account? <Link to="/login">Login</Link>
+        </div>
+      </div>
     </div>
   );
 }

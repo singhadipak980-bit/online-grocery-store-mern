@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../api";
+import "../auth.css";
 
 function Login({ setIsLoggedIn }) {
   const [form, setForm] = useState({
@@ -23,7 +24,6 @@ function Login({ setIsLoggedIn }) {
         password: form.password,
       });
 
-      // 🔴 IMPORTANT CHECK
       if (!res.data || !res.data.token) {
         throw new Error("Token missing in response");
       }
@@ -31,7 +31,6 @@ function Login({ setIsLoggedIn }) {
       localStorage.setItem("token", res.data.token);
       setIsLoggedIn(true);
 
-      alert("Login successful");
       navigate("/");
     } catch (err) {
       console.error("LOGIN ERROR (FRONTEND):", err);
@@ -40,27 +39,36 @@ function Login({ setIsLoggedIn }) {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2>Login</h2>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-        />
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-        />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
 
-        <button type="submit">Login</button>
-      </form>
+          <button type="submit">Login</button>
+        </form>
+
+        <div className="auth-link">
+          Don’t have an account? <Link to="/register">Register</Link>
+        </div>
+      </div>
     </div>
   );
 }
