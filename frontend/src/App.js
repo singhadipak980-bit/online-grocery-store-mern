@@ -8,7 +8,12 @@ import Cart from "./pages/Cart";
 
 function App() {
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
+
+  // ✅ cart with persistence
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem("cart");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -17,27 +22,60 @@ function App() {
     !!localStorage.getItem("token")
   );
 
+  // 🔄 fetch products
   useEffect(() => {
     API.get("/products")
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err));
   }, []);
 
+  // 💾 save cart to localStorage
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  // ➕ add to cart (with quantity)
   const addToCart = (product) => {
-    const exists = cart.find((item) => item._id === product._id);
-    if (exists) return;
-    setCart([...cart, product]);
+    const existing = cart.find((item) => item._id === product._id);
+
+    if (existing) {
+      setCart(
+        cart.map((item) =>
+          item._id === product._id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
+    } else {
+      setCart([...cart, { ...product, quantity: 1 }]);
+    }
   };
 
-  const removeFromCart = (id) => {
-    setCart(cart.filter((item) => item._id !== id));
+  // ➕ increase quantity
+  const increaseQty = (id) => {
+    setCart(
+      cart.map((item) =>
+        item._id === id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
+  // ➖ decrease quantity
+  const decreaseQty = (id) => {
+    setCart(
+      cart
+        .map((item) =>
+          item._id === id
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
   };
 
+  // 🔍 search + category filter
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name
       .toLowerCase()
@@ -48,6 +86,11 @@ function App() {
 
     return matchesSearch && matchesCategory;
   });
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+  };
 
   return (
     <BrowserRouter>
@@ -66,7 +109,7 @@ function App() {
             <div className="container">
               <h1>🛒 Online Grocery Store</h1>
 
-              {/* SEARCH + CATEGORY FILTER */}
+              {/* 🔍 FILTERS */}
               <div className="filters">
                 <input
                   type="text"
@@ -94,7 +137,7 @@ function App() {
                 </select>
               </div>
 
-              {/* PRODUCTS GRID */}
+              {/* 🛍️ PRODUCTS */}
               <div className="products-grid">
                 {filteredProducts.map((p) => (
                   <div className="product-card" key={p._id}>
@@ -127,7 +170,13 @@ function App() {
 
         <Route
           path="/cart"
-          element={<Cart cart={cart} removeFromCart={removeFromCart} />}
+          element={
+            <Cart
+              cart={cart}
+              increaseQty={increaseQty}
+              decreaseQty={decreaseQty}
+            />
+          }
         />
       </Routes>
     </BrowserRouter>

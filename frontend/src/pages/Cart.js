@@ -1,5 +1,8 @@
-function Cart({ cart, removeFromCart }) {
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
+function Cart({ cart, increaseQty, decreaseQty }) {
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   return (
     <div className="container">
@@ -7,7 +10,6 @@ function Cart({ cart, removeFromCart }) {
 
       {cart.length === 0 ? (
         <p>Your cart is empty. Add items to proceed to checkout.</p>
-
       ) : (
         <>
           {cart.map((item) => (
@@ -21,39 +23,44 @@ function Cart({ cart, removeFromCart }) {
               <div className="cart-details">
                 <h3>{item.name}</h3>
                 <p>₹ {item.price}</p>
+
+                <div className="qty-controls">
+                  <button onClick={() => decreaseQty(item._id)}>
+                    −
+                  </button>
+                  <span>{item.quantity}</span>
+                  <button onClick={() => increaseQty(item._id)}>
+                    +
+                  </button>
+                </div>
               </div>
 
-              <button
-                className="remove-btn"
-                onClick={() => removeFromCart(item._id)}
-              >
-                Remove
-              </button>
+              <p>₹ {item.price * item.quantity}</p>
             </div>
           ))}
 
           <div className="cart-summary">
             <h2>Total: ₹ {total}</h2>
           </div>
-          <button
-  onClick={() => {
-    alert("✅ Order placed successfully!");
-    localStorage.removeItem("cart");
-    window.location.href = "/";
-  }}
-  style={{
-    backgroundColor: "#2e7d32",
-    color: "white",
-    padding: "10px",
-    border: "none",
-    borderRadius: "5px",
-    marginTop: "10px",
-    cursor: "pointer"
-  }}
->
-  Checkout
-</button>
 
+          <button
+            onClick={() => {
+              alert("✅ Order placed successfully!");
+              localStorage.removeItem("cart");
+              window.location.href = "/";
+            }}
+            style={{
+              backgroundColor: "#2e7d32",
+              color: "white",
+              padding: "10px",
+              border: "none",
+              borderRadius: "5px",
+              marginTop: "10px",
+              cursor: "pointer",
+            }}
+          >
+            Checkout
+          </button>
         </>
       )}
     </div>
